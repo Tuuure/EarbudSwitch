@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.tuuure.earbudswitch.R
 import app.tuuure.earbudswitch.data.Preferences
+import app.tuuure.earbudswitch.service.AudioMonitorService
 import app.tuuure.earbudswitch.ui.adapter.FilterListAdapter
 import app.tuuure.earbudswitch.utils.ComponentUtils
 import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.bytesToUUID
@@ -153,6 +155,16 @@ class SettingsActivity : AppCompatActivity() {
 
         buttonRefresh.setOnClickListener {
             key = bytesToUUID(randomBytes(16)).toString()
+        }
+
+        toolbar.setOnLongClickListener {
+            Intent(this, AudioMonitorService::class.java).also {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    startForegroundService(it)
+                else
+                    startService(it)
+            }
+            return@setOnLongClickListener true
         }
     }
 

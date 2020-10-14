@@ -67,6 +67,10 @@
             android:theme="@style/CaptureTheme" />
 
         <service
+            android:name=".service.AudioMonitorService"
+            android:enabled="false" />
+
+        <service
             android:name=".service.ScanService"
             android:enabled="false" />
         <service

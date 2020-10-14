@@ -48,4 +48,8 @@
     <string name="text_camera_permission">Required to scan QRCode</string>
     <string name="snack_permission">Please grant all these permissions</string>
 
+    <string name="notification_audio_gain">Audio Focus Gain</string>
+    <string name="notification_audio_loss">Audio Focus Loss</string>
+    <string name="notification_audio_wait">Waiting for Regain Audio Focus</string>
+    <string name="notification_audio_error">Audio Focus Monitor Unknown Error %1%d</string>
 </resources>

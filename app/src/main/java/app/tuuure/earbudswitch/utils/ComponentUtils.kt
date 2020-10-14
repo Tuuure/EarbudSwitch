@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import app.tuuure.earbudswitch.receiver.BackgroundScanReceiver
 import app.tuuure.earbudswitch.receiver.ConnectionChangeReceiver
 import app.tuuure.earbudswitch.service.AdvertiseService
+import app.tuuure.earbudswitch.service.AudioMonitorService
 import app.tuuure.earbudswitch.service.ScanService
 
 class ComponentUtils {
@@ -15,6 +16,7 @@ class ComponentUtils {
             setEnableSettings(
                 context,
                 if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                AudioMonitorService::class.java,
                 AdvertiseService::class.java,
                 ScanService::class.java,
                 ConnectionChangeReceiver::class.java,
