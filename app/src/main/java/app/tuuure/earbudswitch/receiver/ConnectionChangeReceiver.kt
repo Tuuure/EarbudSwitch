@@ -7,7 +7,6 @@ import android.content.Intent
 import android.os.Build
 import app.tuuure.earbudswitch.CancelAdvertiseEvent
 import app.tuuure.earbudswitch.data.Preferences
-import app.tuuure.earbudswitch.data.db.DbRecord
 import app.tuuure.earbudswitch.data.db.EarbudsDatabase
 import app.tuuure.earbudswitch.service.AdvertiseService
 import kotlinx.coroutines.Dispatchers
@@ -30,47 +29,6 @@ class ConnectionChangeReceiver : BroadcastReceiver() {
             context.startService(service)
     }
 
-    private suspend fun updateRecord(record: DbRecord, action: String, state: Int) {
-        when (state) {
-            BluetoothProfile.STATE_CONNECTING -> {
-                when (action) {
-                    BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED -> {
-                        record.isA2dpConnected = false
-                        record.isA2dpConnecting = true
-                    }
-                    BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
-                        record.isHeadsetConnected = false
-                        record.isHeadsetConnecting = true
-                    }
-                }
-            }
-            BluetoothProfile.STATE_CONNECTED -> {
-                when (action) {
-                    BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED -> {
-                        record.isA2dpConnected = true
-                        record.isA2dpConnecting = false
-                    }
-                    BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
-                        record.isHeadsetConnected = true
-                        record.isHeadsetConnecting = false
-                    }
-                }
-            }
-            else -> {
-                when (action) {
-                    BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED -> {
-                        record.isA2dpConnected = false
-                        record.isA2dpConnecting = false
-                    }
-                    BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
-                        record.isHeadsetConnected = false
-                        record.isHeadsetConnecting = false
-                    }
-                }
-            }
-        }
-        database.dbDao().update(record)
-    }
 
     override fun onReceive(context: Context, intent: Intent) {
         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
@@ -81,7 +39,6 @@ class ConnectionChangeReceiver : BroadcastReceiver() {
             runBlocking(Dispatchers.IO) {
                 val state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1)
                 val record = database.dbDao().findByAddress(device.address)
-                updateRecord(record, intent.action!!, state)
                 when (state) {
                     BluetoothProfile.STATE_CONNECTED -> {
                         if (when (preferences.restrictMode) {

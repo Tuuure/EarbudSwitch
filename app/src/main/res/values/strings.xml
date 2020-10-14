@@ -38,6 +38,8 @@
     <string name="action_about">About</string>
     <string name="welcome_button_next">Next</string>
 
+    <string name="fab_description_scan">Scan QR Code</string>
+    <string name="fab_description_new">Generate new random key</string>
     <string name="intro_introduction">Switch your bluetooth earbuds connection</string>
     <string name="intro_permission">Permission</string>
     <string name="intro_location_permission">Location Permission</string>

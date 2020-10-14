@@ -15,7 +15,6 @@ class Preferences constructor(context: Context) {
         private const val BACKGROUND_SCAN_NAME = "BackgroundScan"
         private const val REROUTE_CALLS_NAME = "RerouteCalls"
         private const val POPUP_WINDOW_NAME = "PopupWindow"
-        private const val SIMULTANEOUS_SWITCH_NAME = "SimultaneousSwitch"
     }
 
     private val sp: SharedPreferences = context.applicationContext.getSharedPreferences(
@@ -23,13 +22,12 @@ class Preferences constructor(context: Context) {
         MODE_PRIVATE
     )
 
-    var key: String = ""
+    var key: String
         get() = sp.getString(KEY_NAME, "") as String
         set(value) {
             CoroutineScope(Dispatchers.IO).launch {
                 sp.edit().putString(KEY_NAME, value).apply()
             }
-            field = value
         }
 
     enum class RestrictMode {
@@ -37,7 +35,7 @@ class Preferences constructor(context: Context) {
         BLOCK
     }
 
-    var restrictMode: RestrictMode = RestrictMode.BLOCK
+    var restrictMode: RestrictMode
         get() =
             try {
                 RestrictMode.valueOf(sp.getString(RESTRICT_MODE_NAME, "").toString())
@@ -48,43 +46,29 @@ class Preferences constructor(context: Context) {
             CoroutineScope(Dispatchers.IO).launch {
                 sp.edit().putString(RESTRICT_MODE_NAME, value.toString()).apply()
             }
-            field = value
         }
 
-    var backgroundScan: Boolean = false
-        get() = sp.getBoolean(BACKGROUND_SCAN_NAME, false)
-        set(value) {
-            CoroutineScope(Dispatchers.IO).launch {
-                sp.edit().putBoolean(BACKGROUND_SCAN_NAME, value).apply()
-            }
-            field = value
-        }
-
-    var rerouteCalls: Boolean = false
+    var rerouteCalls: Boolean
         get() = sp.getBoolean(REROUTE_CALLS_NAME, false)
         set(value) {
             CoroutineScope(Dispatchers.IO).launch {
                 sp.edit().putBoolean(REROUTE_CALLS_NAME, value).apply()
             }
-            field = value
         }
 
-    var popupWindow: Boolean = false
+    var backgroundScan: Boolean
+        get() = sp.getBoolean(BACKGROUND_SCAN_NAME, false)
+        set(value) {
+            CoroutineScope(Dispatchers.IO).launch {
+                sp.edit().putBoolean(BACKGROUND_SCAN_NAME, value).apply()
+            }
+        }
+
+    var popupWindow: Boolean
         get() = sp.getBoolean(POPUP_WINDOW_NAME, false)
         set(value) {
             CoroutineScope(Dispatchers.IO).launch {
                 sp.edit().putBoolean(POPUP_WINDOW_NAME, value).apply()
             }
-            field = value
         }
-
-    var simultaneousSwitch: Boolean = false
-        get() = sp.getBoolean(SIMULTANEOUS_SWITCH_NAME, false)
-        set(value) {
-            CoroutineScope(Dispatchers.IO).launch {
-                sp.edit().putBoolean(SIMULTANEOUS_SWITCH_NAME, value).apply()
-            }
-            field = value
-        }
-
 }

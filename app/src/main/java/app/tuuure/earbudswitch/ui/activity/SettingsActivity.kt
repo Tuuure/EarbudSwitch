@@ -1,8 +1,6 @@
 package app.tuuure.earbudswitch.ui.activity
 
 import android.Manifest
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothClass
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -17,8 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.tuuure.earbudswitch.R
 import app.tuuure.earbudswitch.data.Preferences
-import app.tuuure.earbudswitch.data.db.DbRecord
-import app.tuuure.earbudswitch.data.db.EarbudsDatabase
 import app.tuuure.earbudswitch.ui.adapter.FilterListAdapter
 import app.tuuure.earbudswitch.utils.ComponentUtils
 import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.bytesToUUID
@@ -33,13 +29,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
-import java.util.*
 
 
 class SettingsActivity : AppCompatActivity() {
     companion object {
         const val REQUEST_CODE_WELCOME = 9
-        const val KEY_EXTRA = "keyExtra"
         private const val REQUEST_CODE_SCAN = 12
     }
 
@@ -48,47 +42,45 @@ class SettingsActivity : AppCompatActivity() {
     private var key = preferences.key
         set(value) {
             preferences.key = value
+            CoroutineScope(Dispatchers.Default).launch {
+                val uiMode =
+                    resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                val bitmap =
+                    createQRCode(value, Configuration.UI_MODE_NIGHT_YES == uiMode, 1200)
+                withContext(Dispatchers.Main) {
+                    text_key.text = value
+                    image_qr_code.setImageBitmap(bitmap)
+                }
+            }
             field = value
         }
 
-    private lateinit var adapter: FilterListAdapter
+    private var restrictMode: Preferences.RestrictMode = preferences.restrictMode
+        set(value) {
+            if (field != value) {
+                preferences.restrictMode = value
 
-    private fun updateList() {
-        CoroutineScope(Dispatchers.IO).launch {
-            adapter.restrictMode = preferences.restrictMode
+                adapter.restrictMode = value
 
-            val database: EarbudsDatabase by inject()
-            val deviceList: LinkedList<DbRecord> = LinkedList()
+                val mode = getString(
+                    if (value == Preferences.RestrictMode.ALLOW)
+                        R.string.filter_mode_allow
+                    else
+                        R.string.filter_mode_block
+                )
 
-            database.dbDao().getAll().sortedBy {
-                when (preferences.restrictMode) {
-                    Preferences.RestrictMode.ALLOW -> it.isAllowed
-                    Preferences.RestrictMode.BLOCK -> it.isBlocked
-                }
-            }.also { list ->
-                deviceList.addAll(list)
-            }
-
-            BluetoothAdapter.getDefaultAdapter()?.also { bluetoothAdapter ->
-                if (bluetoothAdapter.isEnabled) {
-                    bluetoothAdapter.bondedDevices.filterNot {
-                        it.name.isNullOrEmpty()
-                                || it.bluetoothClass.majorDeviceClass != BluetoothClass.Device.Major.AUDIO_VIDEO
-                    }.forEach { device ->
-                        DbRecord(device).also {
-                            if (!deviceList.contains(it)) {
-                                database.dbDao().insert(it)
-                                deviceList.add(it)
-                            }
-                        }
+                for (i in filterModeSpinner.count - 1 downTo 0) {
+                    if (mode == filterModeSpinner.getItemAtPosition(i)) {
+                        filterModeSpinner.setSelection(i, false)
+                        break
                     }
                 }
-            }
-            withContext(Dispatchers.Main) {
-                adapter.data = deviceList
+
+                field = value
             }
         }
-    }
+
+    private lateinit var adapter: FilterListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -97,14 +89,14 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
     }
 
-    private fun setup(): Boolean {
+    private fun checkInit(): Boolean {
         if (key.isEmpty()
             || checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED
             || checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED
         ) {
             ComponentUtils.setEnableSettings(this, false)
             Intent(this, IntroActivity::class.java).also {
-                startActivityForResult(it, DialogActivity.REQUEST_CODE_WELCOME)
+                startActivityForResult(it, REQUEST_CODE_WELCOME)
             }
             return false
         } else {
@@ -114,13 +106,21 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        if (setup()) {
-            updateQRCode()
+        if (checkInit()) {
+            key = preferences.key
+            restrictMode = preferences.restrictMode
         }
         super.onResume()
     }
 
     private fun initView() {
+        adapter = FilterListAdapter(this)
+        rc_devices.layoutManager = LinearLayoutManager(this)
+        rc_devices.adapter = adapter
+
+        adapter.updateList()
+        adapter.restrictMode = preferences.restrictMode
+
         filterModeSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(
                 adapterView: AdapterView<*>,
@@ -128,79 +128,50 @@ class SettingsActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                val mode = adapterView.getItemAtPosition(position).toString()
-                preferences.restrictMode =
-                    if (mode == getString(R.string.filter_mode_allow))
-                        Preferences.RestrictMode.ALLOW
-                    else
-                        Preferences.RestrictMode.BLOCK
-                updateList()
+                adapterView.getItemAtPosition(position).toString().also {
+                    restrictMode =
+                        if (it == getString(R.string.filter_mode_allow))
+                            Preferences.RestrictMode.ALLOW
+                        else
+                            Preferences.RestrictMode.BLOCK
+                }
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>?) {}
         }
 
-        adapter = FilterListAdapter(this)
-        rc_devices.layoutManager = LinearLayoutManager(this)
-        rc_devices.adapter = adapter
-
-        val mode = getString(
-            if (preferences.restrictMode == Preferences.RestrictMode.ALLOW)
-                R.string.filter_mode_allow
-            else
-                R.string.filter_mode_block
-        )
-
-        for (i in filterModeSpinner.count - 1 downTo 0) {
-            if (mode == filterModeSpinner.getItemAtPosition(i)) {
-                filterModeSpinner.setSelection(i, false)
-                break
-            }
-        }
-
         swipeRefresh.setOnRefreshListener {
-            updateList()
+            adapter.updateList()
             swipeRefresh.isRefreshing = false
         }
 
         buttonCamera.setOnClickListener {
-            startActivityForResult(
-                Intent(this, CaptureActivity::class.java),
-                REQUEST_CODE_SCAN
-            )
+            Intent(this, CaptureActivity::class.java).also {
+                startActivityForResult(it, REQUEST_CODE_SCAN)
+            }
         }
 
         buttonRefresh.setOnClickListener {
             key = bytesToUUID(randomBytes(16)).toString()
-            updateQRCode()
-        }
-    }
-
-
-    private fun updateQRCode() {
-        CoroutineScope(Dispatchers.Default).launch {
-            val nightMode =
-                Configuration.UI_MODE_NIGHT_YES == resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            val bitmap = createQRCode(key, nightMode, 1200)
-            withContext(Dispatchers.Main) {
-                text_key.text = key
-                image_qr_code.setImageBitmap(bitmap)
-            }
         }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
+        menuInflater.inflate(R.menu.menu_settings, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_about) {
-            Toast.makeText(this, "About", Toast.LENGTH_SHORT).show()
+        when (item.itemId) {
+            R.id.action_about -> {
+                Toast.makeText(this, "About", Toast.LENGTH_SHORT).show()
+            }
+            R.id.action_warning -> {
+                Toast.makeText(this, "Warning", Toast.LENGTH_SHORT).show()
+            }
         }
         return super.onOptionsItemSelected(item)
     }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -214,12 +185,10 @@ class SettingsActivity : AppCompatActivity() {
                             .show()
                     } else {
                         key = content
-                        updateQRCode()
                     }
                 }
                 REQUEST_CODE_WELCOME -> {
                     key = bytesToUUID(randomBytes(16)).toString()
-                    updateQRCode()
                 }
             }
         }

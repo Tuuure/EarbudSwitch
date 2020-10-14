@@ -83,53 +83,42 @@
                 android:id="@+id/sw_crashlytics"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:text="@string/switch_crashlytics"
-                app:layout_constraintBottom_toTopOf="@id/sw_background_scan"
+                app:layout_constraintBottom_toTopOf="@id/sw_reroute_calls"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/insideGuideline"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_chainStyle="packed" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/sw_background_scan"
+                android:id="@+id/sw_reroute_calls"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/switch_background_scan"
-                app:layout_constraintBottom_toTopOf="@id/sw_reroute_calls"
+                android:text="@string/switch_reroute_calls"
+                app:layout_constraintBottom_toTopOf="@id/sw_background_scan"
                 app:layout_constraintEnd_toEndOf="@id/sw_crashlytics"
                 app:layout_constraintStart_toStartOf="@id/sw_crashlytics"
                 app:layout_constraintTop_toBottomOf="@id/sw_crashlytics" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/sw_reroute_calls"
+                android:id="@+id/sw_background_scan"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@string/switch_reroute_calls"
+                android:text="@string/switch_background_scan"
                 app:layout_constraintBottom_toTopOf="@id/sw_popup_window"
                 app:layout_constraintEnd_toEndOf="@id/sw_crashlytics"
                 app:layout_constraintStart_toStartOf="@id/sw_crashlytics"
-                app:layout_constraintTop_toBottomOf="@id/sw_background_scan" />
+                app:layout_constraintTop_toBottomOf="@id/sw_reroute_calls" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/sw_popup_window"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/switch_popup_window"
-                app:layout_constraintBottom_toTopOf="@id/sw_simultaneous_switch"
-                app:layout_constraintEnd_toEndOf="@id/sw_crashlytics"
-                app:layout_constraintStart_toStartOf="@id/sw_crashlytics"
-                app:layout_constraintTop_toBottomOf="@id/sw_reroute_calls" />
-
-            <com.google.android.material.switchmaterial.SwitchMaterial
-                android:id="@+id/sw_simultaneous_switch"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@string/switch_simultaneous_switch"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@id/sw_crashlytics"
                 app:layout_constraintStart_toStartOf="@id/sw_crashlytics"
-                app:layout_constraintTop_toBottomOf="@id/sw_popup_window" />
+                app:layout_constraintTop_toBottomOf="@id/sw_background_scan" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
@@ -170,6 +159,7 @@
         app:layout_constraintStart_toStartOf="@id/image_qr_code"
         app:layout_constraintTop_toBottomOf="@id/image_qr_code"
         app:maxImageSize="48dp"
+        android:contentDescription="@string/fab_description_scan"
         app:srcCompat="@drawable/ic_camera" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -184,6 +174,7 @@
         app:layout_constraintStart_toEndOf="@id/buttonCamera"
         app:layout_constraintTop_toBottomOf="@id/image_qr_code"
         app:maxImageSize="30dp"
+        android:contentDescription="@string/fab_description_new"
         app:srcCompat="@drawable/ic_refresh_24" />
 
 

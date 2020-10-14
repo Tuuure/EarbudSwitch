@@ -29,8 +29,6 @@
             android:id="@+id/list_item_check"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:clickable="false"
-            android:visibility="gone" />
+            android:layout_gravity="center_vertical" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

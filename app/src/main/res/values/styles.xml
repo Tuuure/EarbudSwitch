@@ -1,18 +1,4 @@
 <resources>
-    <style name="CardViewHeadButton" parent="CardViewButton">
-        <item name="android:layout_margin">8dp</item>
-    </style>
-
-    <style name="CardViewButton" parent="CardView">
-        <item name="android:layout_height">0dp</item>
-        <item name="android:layout_width">0dp</item>
-        <item name="cardCornerRadius">8dp</item>
-        <item name="android:clickable">false</item>
-        <item name="android:layout_marginStart">8dp</item>
-        <item name="android:layout_marginEnd">8dp</item>
-        <item name="android:foreground">?android:attr/selectableItemBackgroundBorderless</item>
-    </style>
-
     <style name="dialog_style" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!--是否悬浮在activity上-->
         <item name="android:windowIsFloating">true</item>

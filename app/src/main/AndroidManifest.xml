@@ -47,10 +47,8 @@
         android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
 
         <activity
-            android:name=".ui.activity.DialogActivity"
-            android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
-            android:theme="@style/dialog_style">
+            android:name=".ui.activity.SettingsActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE_PREFERENCES" />
                 <action android:name="android.intent.action.MAIN" />
@@ -58,10 +56,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".ui.activity.SettingsActivity"
-            android:screenOrientation="portrait" />
 
         <activity
             android:name=".ui.activity.IntroActivity"

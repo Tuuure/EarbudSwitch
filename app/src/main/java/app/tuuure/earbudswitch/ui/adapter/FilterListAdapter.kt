@@ -1,5 +1,7 @@
 package app.tuuure.earbudswitch.ui.adapter
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothClass
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -14,21 +16,57 @@ import app.tuuure.earbudswitch.data.db.EarbudsDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
 import java.util.*
 
 class FilterListAdapter(var context: Context) :
     RecyclerView.Adapter<FilterListAdapter.ViewHolder>() {
 
-    var data: LinkedList<DbRecord> = LinkedList()
+    private val database: EarbudsDatabase by inject(EarbudsDatabase::class.java)
+    private val data: LinkedList<DbRecord> = LinkedList()
+
+    var restrictMode: Preferences.RestrictMode = Preferences.RestrictMode.BLOCK
         set(value) {
-            if (!value.isNullOrEmpty()) {
+            if (field != value) {
                 field = value
-                notifyDataSetChanged()
+                updateList()
             }
         }
 
-    var restrictMode: Preferences.RestrictMode = Preferences.RestrictMode.BLOCK
+    fun updateList() {
+        CoroutineScope(Dispatchers.IO).launch {
+            database.dbDao().getAll().sortedBy {
+                when (restrictMode) {
+                    Preferences.RestrictMode.ALLOW -> it.isAllowed
+                    Preferences.RestrictMode.BLOCK -> it.isBlocked
+                }
+            }.also { list ->
+                data.clear()
+                data.addAll(list)
+            }
+
+            BluetoothAdapter.getDefaultAdapter()?.also { bluetoothAdapter ->
+                if (bluetoothAdapter.isEnabled) {
+                    bluetoothAdapter.bondedDevices.filterNot {
+                        it.name.isNullOrEmpty()
+                                || it.bluetoothClass.majorDeviceClass != BluetoothClass.Device.Major.AUDIO_VIDEO
+                    }.forEach { device ->
+                        DbRecord(device).also {
+                            if (!data.contains(it)) {
+                                database.dbDao().insert(it)
+                                data.add(it)
+                            }
+                        }
+                    }
+                }
+            }
+
+            withContext(Dispatchers.Main) {
+                notifyDataSetChanged()
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.item_device, parent, false)
@@ -39,7 +77,6 @@ class FilterListAdapter(var context: Context) :
         val item = data[position]
         holder.textView.text = item.name
         holder.itemView.setOnClickListener(holder)
-        holder.checkBox.visibility = View.VISIBLE
         holder.checkBox.isChecked = when (restrictMode) {
             Preferences.RestrictMode.ALLOW -> item.isAllowed
             Preferences.RestrictMode.BLOCK -> item.isBlocked
@@ -57,7 +94,6 @@ class FilterListAdapter(var context: Context) :
 
         override fun onClick(view: View?) {
             val record: DbRecord = data[adapterPosition]
-            val database: EarbudsDatabase by inject(EarbudsDatabase::class.java)
 
             when (restrictMode) {
                 Preferences.RestrictMode.ALLOW -> {

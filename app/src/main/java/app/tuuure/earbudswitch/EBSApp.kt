@@ -1,7 +1,6 @@
 package app.tuuure.earbudswitch
 
 import android.app.Application
-import app.tuuure.earbudswitch.ui.activity.DialogActivity
 import app.tuuure.earbudswitch.data.Preferences
 import app.tuuure.earbudswitch.data.db.EarbudsDatabase
 import app.tuuure.earbudswitch.service.AdvertiseService
@@ -36,14 +35,6 @@ class EBSApp : Application() {
             SimpleSubscriberInfo(AdvertiseService::class.java, true, infos)
         }
 
-        EventBus.builder().addIndex {
-            val infos = arrayOf(
-                SubscriberMethodInfo("onScanResult", ScanResultEvent::class.java),
-                SubscriberMethodInfo("connectGatt", ConnectGattEvent::class.java),
-                SubscriberMethodInfo("onSetFreshEvent", RefreshEvent::class.java)
-            )
-            SimpleSubscriberInfo(DialogActivity::class.java, true, infos)
-        }
     }
 }
 

@@ -30,7 +30,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
-            app:layout_constraintVertical_weight="8" />
+            app:layout_constraintVertical_weight="4" />
 
         <Constraint
             android:id="@id/container_settings"
@@ -47,7 +47,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/container_device"
-            app:layout_constraintVertical_weight="7" />
+            app:layout_constraintVertical_weight="3" />
 
         <Constraint
             android:id="@+id/image_qr_code"
@@ -123,7 +123,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
-            app:layout_constraintVertical_weight="8" />
+            app:layout_constraintVertical_weight="4" />
 
         <Constraint
             android:id="@id/container_settings"
@@ -140,7 +140,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/container_device"
-            app:layout_constraintVertical_weight="7" />
+            app:layout_constraintVertical_weight="3" />
 
         <Constraint
             android:id="@id/image_qr_code"
