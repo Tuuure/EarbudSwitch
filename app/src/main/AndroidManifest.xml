@@ -3,6 +3,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="app.tuuure.earbudswitch">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="true" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -23,8 +39,7 @@
 
     <application
         android:name=".EBSApp"
-        android:allowBackup="true"
-        android:fullBackupContent="@xml/backup_rules"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -32,7 +47,7 @@
         android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
 
         <activity
-            android:name=".activity.DialogActivity"
+            android:name=".ui.activity.DialogActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
             android:theme="@style/dialog_style">
@@ -45,7 +60,11 @@
         </activity>
 
         <activity
-            android:name=".activity.SettingsActivity"
+            android:name=".ui.activity.SettingsActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".ui.activity.IntroActivity"
             android:screenOrientation="portrait" />
 
         <activity
@@ -53,20 +72,26 @@
             android:screenOrientation="portrait"
             android:theme="@style/CaptureTheme" />
 
-        <activity
-            android:name=".activity.IntroActivity"
-            android:screenOrientation="portrait" />
-
-        <service android:name=".earbuds.EarbudService" />
+        <service
+            android:name=".service.ScanService"
+            android:enabled="false" />
+        <service
+            android:name=".service.AdvertiseService"
+            android:enabled="false" />
 
         <receiver
-            android:name=".earbuds.EarbudReceiver"
-            android:enabled="false"
-            android:exported="true">
+            android:name=".receiver.ConnectionChangeReceiver"
+            android:enabled="false">
             <intent-filter>
                 <action android:name="android.bluetooth.a2dp.profile.action.CONNECTION_STATE_CHANGED" />
                 <action android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED" />
             </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.BackgroundScanReceiver"
+            android:enabled="false">
+
         </receiver>
     </application>
 

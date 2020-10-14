@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/motion_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutDescription="@xml/activity_settings_scene">
@@ -17,18 +18,9 @@
     <!--黑白名单 & TWS列表-->
     <androidx.cardview.widget.CardView
         android:id="@+id/container_device"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginBottom="6dp"
-        android:alpha="1.0"
-        android:visibility="visible"
-        app:cardCornerRadius="8dp"
-        app:layout_constraintBottom_toTopOf="@id/container_settings"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintVertical_weight="4">
+        app:cardCornerRadius="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -52,29 +44,6 @@
                     android:requiresFadingEdge="vertical" />
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-
-            <ImageView
-                android:id="@+id/bth_off_image"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="3"
-                android:src="@drawable/ic_raised_eyebrow"
-                android:visibility="gone"
-                app:tint="?android:attr/colorForeground" />
-
-            <TextView
-                android:id="@+id/bth_off_text"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-medium"
-                android:gravity="center_horizontal"
-                android:text="@string/bluetooth_off"
-                android:textSize="18sp"
-                android:visibility="gone" />
-
-
             <androidx.appcompat.widget.AppCompatSpinner
                 android:id="@+id/filterModeSpinner"
                 android:layout_width="match_parent"
@@ -85,40 +54,99 @@
 
     </androidx.cardview.widget.CardView>
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/outsideGuideline"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.42" />
+
     <!--通讯逻辑 & 隐私设置 & 验证密钥-->
     <androidx.cardview.widget.CardView
         android:id="@+id/container_settings"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="12dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginBottom="12dp"
-        android:alpha="1.0"
-        android:visibility="visible"
-        app:cardCornerRadius="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/container_device"
-        app:layout_constraintVertical_weight="3" >
+        app:cardCornerRadius="8dp">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.Guideline
+                android:id="@+id/insideGuideline"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layout_constraintGuide_percent="0.42" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sw_crashlytics"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/switch_crashlytics"
+                app:layout_constraintBottom_toTopOf="@id/sw_background_scan"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/insideGuideline"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sw_background_scan"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/switch_background_scan"
+                app:layout_constraintBottom_toTopOf="@id/sw_reroute_calls"
+                app:layout_constraintEnd_toEndOf="@id/sw_crashlytics"
+                app:layout_constraintStart_toStartOf="@id/sw_crashlytics"
+                app:layout_constraintTop_toBottomOf="@id/sw_crashlytics" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sw_reroute_calls"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/switch_reroute_calls"
+                app:layout_constraintBottom_toTopOf="@id/sw_popup_window"
+                app:layout_constraintEnd_toEndOf="@id/sw_crashlytics"
+                app:layout_constraintStart_toStartOf="@id/sw_crashlytics"
+                app:layout_constraintTop_toBottomOf="@id/sw_background_scan" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sw_popup_window"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/switch_popup_window"
+                app:layout_constraintBottom_toTopOf="@id/sw_simultaneous_switch"
+                app:layout_constraintEnd_toEndOf="@id/sw_crashlytics"
+                app:layout_constraintStart_toStartOf="@id/sw_crashlytics"
+                app:layout_constraintTop_toBottomOf="@id/sw_reroute_calls" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/sw_simultaneous_switch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/switch_simultaneous_switch"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/sw_crashlytics"
+                app:layout_constraintStart_toStartOf="@id/sw_crashlytics"
+                app:layout_constraintTop_toBottomOf="@id/sw_popup_window" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
-
-
 
     <ImageView
         android:id="@+id/image_qr_code"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="12dp"
-        android:adjustViewBounds="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
         android:contentDescription="@string/text_qr_code"
         android:scaleType="fitXY"
         android:src="@drawable/ic_chicken"
         android:translationZ="2dp"
-        app:layout_constraintBottom_toTopOf="@id/sw_lan"
-        app:layout_constraintEnd_toEndOf="@id/container_settings"
+        app:layout_constraintBottom_toBottomOf="@id/container_settings"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="@id/outsideGuideline"
         app:layout_constraintStart_toStartOf="@id/container_settings"
         app:layout_constraintTop_toTopOf="@id/container_settings" />
 
@@ -157,30 +185,6 @@
         app:layout_constraintTop_toBottomOf="@id/image_qr_code"
         app:maxImageSize="30dp"
         app:srcCompat="@drawable/ic_refresh_24" />
-
-    <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/sw_lan"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:text="@string/switch_lan_enable"
-        android:translationZ="2dp"
-        app:layout_constraintBottom_toTopOf="@id/sw_crashlytics"
-        app:layout_constraintEnd_toEndOf="@id/container_settings"
-        app:layout_constraintStart_toStartOf="@id/container_settings"
-        app:layout_constraintTop_toBottomOf="@id/image_qr_code" />
-
-    <com.google.android.material.switchmaterial.SwitchMaterial
-        android:id="@+id/sw_crashlytics"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:text="@string/switch_crashlytics"
-        android:translationZ="2dp"
-        app:layout_constraintBottom_toBottomOf="@id/container_settings"
-        app:layout_constraintEnd_toEndOf="@id/container_settings"
-        app:layout_constraintStart_toStartOf="@id/container_settings"
-        app:layout_constraintTop_toBottomOf="@id/sw_lan" />
 
 
 </androidx.constraintlayout.motion.widget.MotionLayout>

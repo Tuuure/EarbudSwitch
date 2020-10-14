@@ -1,4 +1,4 @@
-package app.tuuure.earbudswitch.introFrag
+package app.tuuure.earbudswitch.ui.introFrag
 
 import android.Manifest
 import android.content.Context
@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import app.tuuure.earbudswitch.R
-import app.tuuure.earbudswitch.activity.IntroActivity
+import app.tuuure.earbudswitch.ui.activity.IntroActivity
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_intro_permission.*
 

@@ -14,15 +14,25 @@
     <string name="toast_camera_permission_denied">To scan QRCode, please grant the Camera Permission</string>
 
     <string name="toast_same_key">Same Key Detected</string>
-    <string name="switch_lan_enable">Use LAN only when WIFI is available</string>
+
     <string name="switch_crashlytics">Upload crash</string>
+    <string name="switch_background_scan">Background Scan</string>
+    <string name="switch_reroute_calls">Reroute Calls</string>
+    <string name="switch_popup_window">Popup Window</string>
+    <string name="switch_simultaneous_switch">Simultaneous Switch</string>
 
-    <string name="toast_disconnect_title">Disconnect device?</string>
-    <string name="toast_disconnect_content">Your device will disconnect from %1$s.</string>
-    <string name="toast_disconnect_negative">Cancel</string>
-    <string name="toast_disconnect_positive">OK</string>
+    <string name="dialog_disconnect_title">Disconnect device?</string>
+    <string name="dialog_disconnect_content">Your device will disconnect from %1$s.</string>
+    <string name="dialog_potential_issues_title">Potential issues</string>
+    <string name="dialog_potential_issues_content">These settings are disabled and that may cause no scan results</string>
 
-    <string name="bluetooth_off">Click to Turn On Bluetooth</string>
+    <string name="dialog_button_back">Back</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="dialog_button_ok">OK</string>
+
+    <string name="text_bluetooth_diable">Bluetooth Service Disabled</string>
+    <string name="text_location_diable">Location Service Disabled</string>
+
     <string name="toast_bth_on">Turning on Bluetooth...</string>
 
     <string name="action_about">About</string>

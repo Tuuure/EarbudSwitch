@@ -1,9 +1,5 @@
 package app.tuuure.earbudswitch
 
-import android.bluetooth.BluetoothDevice
-
-data class ScanEvent(val devices: Collection<BluetoothDevice>)
-
 data class ScanResultEvent(
     val server: String,
     val devices: Collection<String>,

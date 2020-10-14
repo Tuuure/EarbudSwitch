@@ -4,9 +4,9 @@ import android.bluetooth.*
 import android.content.Context
 import android.util.Log
 import app.tuuure.earbudswitch.RefreshEvent
-import app.tuuure.earbudswitch.earbuds.EarbudManager
+import app.tuuure.earbudswitch.utils.EarbudConnectUtils
 import app.tuuure.earbudswitch.nearby.IConnecter
-import app.tuuure.earbudswitch.utils.CryptoConvert
+import app.tuuure.earbudswitch.utils.CryptoConvertUtils
 import org.greenrobot.eventbus.EventBus
 import java.util.*
 
@@ -50,7 +50,7 @@ class BleConnecter constructor(
             override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
                 super.onServicesDiscovered(gatt, status)
                 if (status == BluetoothGatt.GATT_SUCCESS) {
-                    val uuid = CryptoConvert.bytesToUUID(CryptoConvert.md5code32(device))
+                    val uuid = CryptoConvertUtils.bytesToUUID(CryptoConvertUtils.md5code32(device))
 
                     val bluetoothGattService = gatt.getService(uuid)
                     val gattCharacteristic = bluetoothGattService.getCharacteristic(uuid)
@@ -72,7 +72,7 @@ class BleConnecter constructor(
                 super.onCharacteristicRead(gatt, characteristic, status)
                 val salt = characteristic?.value
                 if (salt != null) {
-                    val authCode = CryptoConvert.otpGenerater(key, salt)
+                    val authCode = CryptoConvertUtils.otpGenerater(key, salt)
                     Log.d("TAG", authCode.toString())
                     characteristic.value = authCode
                     gatt?.writeCharacteristic(characteristic)
@@ -96,7 +96,7 @@ class BleConnecter constructor(
                 gatt.disconnect()
                 gatt.close()
 
-                EarbudManager.connectEBS(context, device)
+                EarbudConnectUtils.connectEBS(context, device)
 
                 super.onCharacteristicChanged(gatt, characteristic)
             }

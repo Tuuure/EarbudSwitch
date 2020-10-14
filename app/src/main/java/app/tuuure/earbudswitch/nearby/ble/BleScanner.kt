@@ -11,11 +11,11 @@ import android.os.Build
 import android.os.ParcelUuid
 import android.widget.Toast
 import androidx.annotation.RequiresApi
-import app.tuuure.earbudswitch.RadarReceiver
+import app.tuuure.earbudswitch.receiver.BackgroundScanReceiver
 import app.tuuure.earbudswitch.ScanResultEvent
 import app.tuuure.earbudswitch.nearby.IScanner
-import app.tuuure.earbudswitch.utils.CryptoConvert.Companion.bytesToUUID
-import app.tuuure.earbudswitch.utils.CryptoConvert.Companion.md5code32
+import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.bytesToUUID
+import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.md5code32
 import org.greenrobot.eventbus.EventBus
 import java.util.*
 import kotlin.collections.ArrayList
@@ -80,8 +80,8 @@ class BleScanner constructor(
         PendingIntent.getBroadcast(
             context,
             REQUEST_CODE,
-            Intent(context, RadarReceiver::class.java).apply {
-                action = RadarReceiver.ACTION_SERVER_MONITOR
+            Intent(context, BackgroundScanReceiver::class.java).apply {
+                action = BackgroundScanReceiver.ACTION_BG_SCAN
             },
             PendingIntent.FLAG_UPDATE_CURRENT
         )

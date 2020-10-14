@@ -1,4 +1,4 @@
-package app.tuuure.earbudswitch
+package app.tuuure.earbudswitch.receiver
 
 import android.bluetooth.le.BluetoothLeScanner
 import android.content.BroadcastReceiver
@@ -9,13 +9,13 @@ import androidx.annotation.RequiresApi
 import app.tuuure.earbudswitch.nearby.ble.BleScanner
 
 @RequiresApi(Build.VERSION_CODES.O)
-class RadarReceiver : BroadcastReceiver() {
+class BackgroundScanReceiver : BroadcastReceiver() {
     companion object {
-        const val ACTION_SERVER_MONITOR = "app.tuuure.earbudswitch.SERVER_MONITOR"
+        const val ACTION_BG_SCAN = "app.tuuure.earbudswitch.action.BG_SCAN"
     }
 
-    override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent?.action == ACTION_SERVER_MONITOR) {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == ACTION_BG_SCAN) {
             val bleCallbackType = intent.getIntExtra(BluetoothLeScanner.EXTRA_CALLBACK_TYPE, -1)
             val bleErrorCode =
                 intent.getIntExtra(BluetoothLeScanner.EXTRA_ERROR_CODE, BleScanner.SCAN_NO_ERROR)

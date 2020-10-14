@@ -10,10 +10,10 @@ import android.os.ParcelUuid
 import android.util.Log
 import app.tuuure.earbudswitch.DisconnectEvent
 import app.tuuure.earbudswitch.nearby.IAdvertiser
-import app.tuuure.earbudswitch.utils.CryptoConvert.Companion.bytesToUUID
-import app.tuuure.earbudswitch.utils.CryptoConvert.Companion.md5code32
-import app.tuuure.earbudswitch.utils.CryptoConvert.Companion.otpGenerater
-import app.tuuure.earbudswitch.utils.CryptoConvert.Companion.randomBytes
+import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.bytesToUUID
+import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.md5code32
+import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.otpGenerater
+import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.randomBytes
 import org.greenrobot.eventbus.EventBus
 import java.util.*
 

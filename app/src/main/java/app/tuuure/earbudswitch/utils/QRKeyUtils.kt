@@ -3,7 +3,7 @@ package app.tuuure.earbudswitch.utils
 import android.graphics.Bitmap
 import com.king.zxing.util.CodeUtils
 
-class KeyQRCode {
+class QRKeyUtils {
     companion object {
         private const val prefix = "ebs://"
 

@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/app_bar_warning"
+        android:title=""
+        android:icon="@drawable/ic_warning_24"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/app_bar_settings"
         android:title=""
         android:icon="@drawable/ic_settings_24"

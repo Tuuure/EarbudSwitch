@@ -1,10 +1,14 @@
-package app.tuuure.earbudswitch.recyclerList
+package app.tuuure.earbudswitch.ui.adapter
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothA2dp
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.graphics.drawable.Animatable
 import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,15 +17,22 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import app.tuuure.earbudswitch.ConnectGattEvent
 import app.tuuure.earbudswitch.R
-import app.tuuure.earbudswitch.earbuds.EarbudManager
-import kotlinx.coroutines.*
+import app.tuuure.earbudswitch.data.Earbud
+import app.tuuure.earbudswitch.utils.EarbudConnectUtils
 import org.greenrobot.eventbus.EventBus
 import java.util.*
 
 class ScanListAdapter(val context: Context) :
     RecyclerView.Adapter<ScanListAdapter.ViewHolder>() {
-    //var data: LinkedList<ListItem> = LinkedList()
-    var data: LinkedHashSet<ListItem> = LinkedHashSet()
+
+    var data: LinkedHashSet<Earbud> = LinkedHashSet()
+        set(value) {
+            if (!value.isNullOrEmpty()) {
+                Log.d("TAG","loadDevices")
+                field = value
+                notifyDataSetChanged()
+            }
+        }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     val nearIcon: Drawable = context.getDrawable(R.drawable.ic_near_me_24)!!
@@ -35,63 +46,66 @@ class ScanListAdapter(val context: Context) :
     @SuppressLint("UseCompatLoadingForDrawables")
     val refreshIcon: Drawable = context.getDrawable(R.drawable.anim_refresh)!!
 
-    fun updateData(devices: LinkedHashSet<ListItem>) {
-        data.clear()
-        if (devices.isNotEmpty()) {
-            data = devices
-        }
-        notifyDataSetChanged()
-    }
-
-    fun setFresh(device: String, isFreshing: Boolean) {
-        data.indexOf(ListItem("", device)).also {
-            data.elementAt(it).isChecked = isFreshing
-            notifyItemChanged(it)
-        }
-    }
-
-    fun setSelected(profile: Int, devices: Collection<String>) {
-        data.forEach {
-            val isContained = it.address in devices
-
-            when (profile) {
-                BluetoothProfile.A2DP -> {
-                    if (it.isA2dpConnected != isContained) {
-                        it.isA2dpConnected = isContained
-                        notifyItemChanged(data.indexOf(it))
+    fun setStatus(device: BluetoothDevice, action: String, state: Int) {
+        val index = data.indexOf(Earbud(device))
+        val tempItem = data.elementAt(index)
+        when (state) {
+            BluetoothProfile.STATE_CONNECTING -> {
+                when (action) {
+                    BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED -> {
+                        tempItem.isA2dpConnected = false
+                        tempItem.isA2dpConnecting = true
                     }
-                }
-                BluetoothProfile.HEADSET -> {
-                    if (it.isHeadsetConnected != isContained) {
-                        it.isHeadsetConnected = isContained
-                        notifyItemChanged(data.indexOf(it))
+                    BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
+                        tempItem.isHeadsetConnected = false
+                        tempItem.isHeadsetConnecting = true
                     }
                 }
             }
-
+            BluetoothProfile.STATE_CONNECTED -> {
+                when (action) {
+                    BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED -> {
+                        tempItem.isA2dpConnected = true
+                        tempItem.isA2dpConnecting = false
+                    }
+                    BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
+                        tempItem.isHeadsetConnected = true
+                        tempItem.isHeadsetConnecting = false
+                    }
+                }
+            }
+            else -> {
+                when (action) {
+                    BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED -> {
+                        tempItem.isA2dpConnected = false
+                        tempItem.isA2dpConnecting = false
+                    }
+                    BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
+                        tempItem.isHeadsetConnected = false
+                        tempItem.isHeadsetConnecting = false
+                    }
+                }
+            }
         }
+        data.add(tempItem)
+        notifyItemChanged(index)
     }
 
-    var job = CoroutineScope(Dispatchers.Default).launch { }
-
-    fun setServer(server: String, devices: Collection<String>) {
-        job.cancel()
+    fun setServer(server: String, devices: MutableSet<String>) {
         data.forEach {
             val isContained = it.address in devices
-            if ((it.server == server) != isContained) {
-                it.server = if (isContained) server else ""
+            if (isContained && it.server != server) {
+                it.server = server
                 notifyItemChanged(data.indexOf(it))
             }
         }
-        job = CoroutineScope(Dispatchers.Default).launch {
-            delay(2000)
-            data.forEach {
-                if (it.server != "") {
-                    it.server = ""
-                    withContext(Dispatchers.Main) {
-                        notifyItemChanged(data.indexOf(it))
-                    }
-                }
+    }
+
+    fun removeServer(server: String, devices: MutableSet<String>) {
+        data.forEach {
+            if (it.server == server) {
+                it.server = ""
+                notifyItemChanged(data.indexOf(it))
             }
         }
     }
@@ -109,11 +123,13 @@ class ScanListAdapter(val context: Context) :
         var drawable: Drawable? = null
         if (item.server.isNotEmpty())
             drawable = nearIcon
-        if (item.isChecked) {
+        if (item.isHeadsetConnecting || item.isA2dpConnecting) {
             drawable = refreshIcon
         }
-        if (item.isA2dpConnected || item.isHeadsetConnected)
+        if (item.isA2dpConnected || item.isHeadsetConnected) {
             drawable = connectIcon
+        }
+
 
         holder.textView.setCompoundDrawablesRelativeWithIntrinsicBounds(
             headSetIcon,
@@ -139,21 +155,18 @@ class ScanListAdapter(val context: Context) :
             val wrapperPosition = adapterPosition
             val item = data.elementAt(wrapperPosition)
 
-            if (item.isChecked) {
-                return
-            }
             if (item.isHeadsetConnected || item.isA2dpConnected) {
                 AlertDialog.Builder(context).apply {
-                    setTitle(R.string.toast_disconnect_title)
+                    setTitle(R.string.dialog_disconnect_title)
                     setMessage(
                         String.format(
-                            context.getString(R.string.toast_disconnect_content),
+                            context.getString(R.string.dialog_disconnect_content),
                             item.name
                         )
                     )
-                    setNegativeButton(R.string.toast_disconnect_negative) { _, _ -> }
-                    setPositiveButton(R.string.toast_disconnect_positive) { _, _ ->
-                        EarbudManager.disconnectEBS(
+                    setNegativeButton(R.string.dialog_button_cancel) { _, _ -> }
+                    setPositiveButton(R.string.dialog_button_ok) { _, _ ->
+                        EarbudConnectUtils.disconnectEBS(
                             context,
                             item.address
                         )
@@ -161,7 +174,7 @@ class ScanListAdapter(val context: Context) :
                 }.show()
             } else {
                 if (item.server.isEmpty()) {
-                    EarbudManager.connectEBS(context, item.address)
+                    EarbudConnectUtils.connectEBS(context, item.address)
                 } else {
                     EventBus.getDefault().post(ConnectGattEvent(item.server, item.address))
                 }

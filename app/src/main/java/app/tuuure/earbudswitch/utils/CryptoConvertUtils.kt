@@ -8,7 +8,7 @@ import java.util.*
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
 
-class CryptoConvert {
+class CryptoConvertUtils {
     companion object {
 
         private const val KEY_MAC_SHA1 = "HmacSHA1"
