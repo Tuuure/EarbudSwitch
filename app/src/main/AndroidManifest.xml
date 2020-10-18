@@ -67,15 +67,14 @@
             android:theme="@style/CaptureTheme" />
 
         <service
-            android:name=".service.AudioMonitorService"
+            android:name=".service.VigilService"
             android:enabled="false" />
 
-        <service
-            android:name=".service.ScanService"
-            android:enabled="false" />
-        <service
-            android:name=".service.AdvertiseService"
-            android:enabled="false" />
+        <receiver
+            android:name=".receiver.CallReceiver"
+            android:enabled="false">
+
+        </receiver>
 
         <receiver
             android:name=".receiver.ConnectionChangeReceiver"

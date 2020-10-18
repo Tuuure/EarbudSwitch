@@ -1,19 +1,15 @@
-package app.tuuure.earbudswitch.nearby.ble
+package app.tuuure.earbudswitch.ble
 
 import android.bluetooth.*
 import android.content.Context
 import android.util.Log
 import app.tuuure.earbudswitch.RefreshEvent
-import app.tuuure.earbudswitch.utils.EarbudConnectUtils
-import app.tuuure.earbudswitch.nearby.IConnecter
 import app.tuuure.earbudswitch.utils.CryptoConvertUtils
+import app.tuuure.earbudswitch.utils.EarbudConnectUtils
 import org.greenrobot.eventbus.EventBus
 import java.util.*
 
-class BleConnecter constructor(
-    override val context: Context,
-    override var key: String,
-) : IConnecter {
+class BleConnecter constructor(val context: Context, var key: String) {
     companion object {
         private const val DescriptorUUID = "00002902-0000-1000-8000-00805f9b34fb"
     }
@@ -21,7 +17,7 @@ class BleConnecter constructor(
     private val bluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
     private lateinit var bluetoothGatt: BluetoothGatt
 
-    override fun connect(server: String, device: String) {
+    fun connect(server: String, device: String) {
         val bluetoothGattCallback: BluetoothGattCallback = object : BluetoothGattCallback() {
             override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
                 super.onConnectionStateChange(gatt, status, newState)

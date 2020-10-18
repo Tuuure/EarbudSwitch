@@ -11,7 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import app.tuuure.earbudswitch.R
 import app.tuuure.earbudswitch.data.Preferences
-import app.tuuure.earbudswitch.data.db.DbRecord
+import app.tuuure.earbudswitch.data.db.Earbud
 import app.tuuure.earbudswitch.data.db.EarbudsDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +24,7 @@ class FilterListAdapter(var context: Context) :
     RecyclerView.Adapter<FilterListAdapter.ViewHolder>() {
 
     private val database: EarbudsDatabase by inject(EarbudsDatabase::class.java)
-    private val data: LinkedList<DbRecord> = LinkedList()
+    private val data: LinkedList<Earbud> = LinkedList()
 
     var restrictMode: Preferences.RestrictMode = Preferences.RestrictMode.BLOCK
         set(value) {
@@ -52,7 +52,7 @@ class FilterListAdapter(var context: Context) :
                         it.name.isNullOrEmpty()
                                 || it.bluetoothClass.majorDeviceClass != BluetoothClass.Device.Major.AUDIO_VIDEO
                     }.forEach { device ->
-                        DbRecord(device).also {
+                        Earbud(device).also {
                             if (!data.contains(it)) {
                                 database.dbDao().insert(it)
                                 data.add(it)
@@ -93,7 +93,7 @@ class FilterListAdapter(var context: Context) :
         val checkBox: CheckBox = itemView.findViewById(R.id.list_item_check)
 
         override fun onClick(view: View?) {
-            val record: DbRecord = data[adapterPosition]
+            val record: Earbud = data[adapterPosition]
 
             when (restrictMode) {
                 Preferences.RestrictMode.ALLOW -> {

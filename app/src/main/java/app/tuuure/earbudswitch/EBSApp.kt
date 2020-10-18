@@ -3,10 +3,6 @@ package app.tuuure.earbudswitch
 import android.app.Application
 import app.tuuure.earbudswitch.data.Preferences
 import app.tuuure.earbudswitch.data.db.EarbudsDatabase
-import app.tuuure.earbudswitch.service.AdvertiseService
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.meta.SimpleSubscriberInfo
-import org.greenrobot.eventbus.meta.SubscriberMethodInfo
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -27,13 +23,13 @@ class EBSApp : Application() {
             modules(myModules)
         }
 
-        EventBus.builder().addIndex {
-            val infos = arrayOf(
-                SubscriberMethodInfo("onDisconnectEvent", DisconnectEvent::class.java),
-                SubscriberMethodInfo("onCancelAdvertise", CancelAdvertiseEvent::class.java)
-            )
-            SimpleSubscriberInfo(AdvertiseService::class.java, true, infos)
-        }
+//        EventBus.builder().addIndex {
+//            val infos = arrayOf(
+//                SubscriberMethodInfo("onDisconnectEvent", DisconnectEvent::class.java),
+//                SubscriberMethodInfo("onCancelAdvertise", CancelAdvertiseEvent::class.java)
+//            )
+//            SimpleSubscriberInfo(AdvertiseService::class.java, true, infos)
+//        }
 
     }
 }

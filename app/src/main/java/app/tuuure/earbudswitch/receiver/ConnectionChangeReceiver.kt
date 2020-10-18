@@ -1,59 +1,88 @@
 package app.tuuure.earbudswitch.receiver
 
-import android.bluetooth.*
+import android.bluetooth.BluetoothA2dp
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothHeadset
+import android.bluetooth.BluetoothProfile
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import app.tuuure.earbudswitch.CancelAdvertiseEvent
+import android.util.Log
+import app.tuuure.earbudswitch.ble.BleScanner
 import app.tuuure.earbudswitch.data.Preferences
 import app.tuuure.earbudswitch.data.db.EarbudsDatabase
-import app.tuuure.earbudswitch.service.AdvertiseService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import org.greenrobot.eventbus.EventBus
 import org.koin.java.KoinJavaComponent.inject
 
 class ConnectionChangeReceiver : BroadcastReceiver() {
-    val database: EarbudsDatabase by inject(EarbudsDatabase::class.java)
-    val preferences: Preferences by inject(Preferences::class.java)
-
-    private fun startService(context: Context, device: BluetoothDevice, state: Int) {
-        val service = Intent(context, AdvertiseService::class.java).apply {
-            putExtra(BluetoothDevice.EXTRA_DEVICE, device.address)
-            putExtra(BluetoothProfile.EXTRA_STATE, state)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            context.startForegroundService(service)
-        else
-            context.startService(service)
-    }
-
+    private val database: EarbudsDatabase by inject(EarbudsDatabase::class.java)
+    private val preferences: Preferences by inject(Preferences::class.java)
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED != intent.action && BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED != intent.action)
+            return
         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-        if (device == null || device.name == null || device.name.isEmpty() || device.bluetoothClass.majorDeviceClass != BluetoothClass.Device.Major.AUDIO_VIDEO)
+        if (device == null || device.name == null || device.name.isEmpty())
             return
 
-        if (BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED == intent.action || BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED == intent.action) {
-            runBlocking(Dispatchers.IO) {
-                val state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1)
-                val record = database.dbDao().findByAddress(device.address)
+        val state = intent.getIntExtra(BluetoothProfile.EXTRA_STATE, -1)
+        Log.d(intent.action, state.toString())
+
+        runBlocking(Dispatchers.IO) {
+            val record = database.dbDao().findByAddress(device.address)
+            val isConnected = record.isA2dpConnected || record.isHeadSetConnected
+            val restrictMode = preferences.restrictMode
+
+            var isEmpty = true
+
+            if (state == BluetoothProfile.STATE_CONNECTED) {
+                isEmpty = database.dbDao().getConnected().none {
+                    when (restrictMode) {
+                        Preferences.RestrictMode.ALLOW -> it.isAllowed
+                        Preferences.RestrictMode.BLOCK -> !it.isBlocked
+                    }
+                }
+            }
+
+            (state == BluetoothProfile.STATE_CONNECTED).also { connected ->
+                when (intent.action) {
+                    BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED -> {
+                        if (connected != record.isA2dpConnected) {
+                            record.isA2dpConnected = connected
+                            database.dbDao().update(record)
+                        }
+                    }
+                    BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED -> {
+                        if (connected != record.isHeadSetConnected) {
+                            record.isHeadSetConnected = connected
+                            database.dbDao().update(record)
+                        }
+                    }
+                }
+            }
+
+            if (state == BluetoothProfile.STATE_DISCONNECTED) {
+                isEmpty = database.dbDao().getConnected().none {
+                    when (restrictMode) {
+                        Preferences.RestrictMode.ALLOW -> it.isAllowed
+                        Preferences.RestrictMode.BLOCK -> !it.isBlocked
+                    }
+                }
+            }
+
+            if (isConnected != (record.isA2dpConnected || record.isHeadSetConnected)) {
                 when (state) {
                     BluetoothProfile.STATE_CONNECTED -> {
-                        if (when (preferences.restrictMode) {
-                                Preferences.RestrictMode.ALLOW -> record.isAllowed
-                                Preferences.RestrictMode.BLOCK -> !record.isBlocked
-                            }
-                        ) {
-                            //Log.d("TAG", "CONNECTED")
-                            // 已连接到设备，开始广播
-                            startService(context, device, state)
+                        if (isEmpty) {
+                            BleScanner.stopScan(context)
+                            BleScanner.startScan(context)
                         }
                     }
                     BluetoothProfile.STATE_DISCONNECTED -> {
-                        //Log.d("TAG", "DISCONNECTED")
-                        EventBus.getDefault().post(CancelAdvertiseEvent(device.address))
+                        if (isEmpty) {
+                            BleScanner.stopScan(context)
+                        }
                     }
                 }
             }

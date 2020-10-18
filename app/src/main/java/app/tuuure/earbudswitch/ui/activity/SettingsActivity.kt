@@ -1,7 +1,11 @@
 package app.tuuure.earbudswitch.ui.activity
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Build
@@ -16,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.tuuure.earbudswitch.R
 import app.tuuure.earbudswitch.data.Preferences
-import app.tuuure.earbudswitch.service.AudioMonitorService
+import app.tuuure.earbudswitch.service.VigilService
 import app.tuuure.earbudswitch.ui.adapter.FilterListAdapter
 import app.tuuure.earbudswitch.utils.ComponentUtils
 import app.tuuure.earbudswitch.utils.CryptoConvertUtils.Companion.bytesToUUID
@@ -111,8 +115,20 @@ class SettingsActivity : AppCompatActivity() {
         if (checkInit()) {
             key = preferences.key
             restrictMode = preferences.restrictMode
+
+            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED).also { intentFilter ->
+                registerReceiver(receiver, intentFilter)
+            }
         }
         super.onResume()
+    }
+
+    override fun onPause() {
+        try {
+            unregisterReceiver(receiver)
+        } catch (ignored: IllegalArgumentException) {
+        }
+        super.onPause()
     }
 
     private fun initView() {
@@ -158,7 +174,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         toolbar.setOnLongClickListener {
-            Intent(this, AudioMonitorService::class.java).also {
+            Intent(this, VigilService::class.java).also {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     startForegroundService(it)
                 else
@@ -202,6 +218,16 @@ class SettingsActivity : AppCompatActivity() {
                 REQUEST_CODE_WELCOME -> {
                     key = bytesToUUID(randomBytes(16)).toString()
                 }
+            }
+        }
+    }
+
+    private val receiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (BluetoothAdapter.ACTION_STATE_CHANGED == intent.action
+                && intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_ON
+            ) {
+                adapter.updateList()
             }
         }
     }

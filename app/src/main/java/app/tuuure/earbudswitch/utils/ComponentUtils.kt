@@ -5,9 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import app.tuuure.earbudswitch.receiver.BackgroundScanReceiver
 import app.tuuure.earbudswitch.receiver.ConnectionChangeReceiver
-import app.tuuure.earbudswitch.service.AdvertiseService
-import app.tuuure.earbudswitch.service.AudioMonitorService
-import app.tuuure.earbudswitch.service.ScanService
+import app.tuuure.earbudswitch.service.VigilService
 
 class ComponentUtils {
     companion object {
@@ -16,16 +14,15 @@ class ComponentUtils {
             setEnableSettings(
                 context,
                 if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                AudioMonitorService::class.java,
-                AdvertiseService::class.java,
-                ScanService::class.java,
+                VigilService::class.java,
+                //CallReceiver::class.java,
                 ConnectionChangeReceiver::class.java,
                 BackgroundScanReceiver::class.java
             )
         }
 
         @JvmStatic
-        private fun setEnableSettings(context: Context, state: Int, vararg clazz: Class<*>) {
+        fun setEnableSettings(context: Context, state: Int, vararg clazz: Class<*>) {
             if (clazz.isNullOrEmpty())
                 return
 

@@ -1,5 +1,6 @@
 package app.tuuure.earbudswitch.utils
 
+import android.util.Log
 import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -22,21 +23,32 @@ class CryptoConvertUtils {
 
         @JvmStatic
         fun randomBytes(length: Int): ByteArray {
-            val ng = SecureRandom()
             val bytes = ByteArray(length)
-            ng.nextBytes(bytes)
+            SecureRandom().nextBytes(bytes)
             return bytes
         }
 
         @JvmStatic
         fun otpGenerater(key: String, salt: ByteArray): ByteArray {
-            val sks = SecretKeySpec(key.toByteArray(), KEY_MAC_SHA1)
-            val mac = Mac.getInstance(KEY_MAC_SHA1)
-            mac.init(sks)
-            val hash = mac.doFinal(salt)
-            val offset: Int = hash.get(hash.size - 1).toInt() and 0xF
+            val hash = Mac.getInstance(KEY_MAC_SHA1).run {
+                init(SecretKeySpec(key.toByteArray(), KEY_MAC_SHA1))
+                doFinal(salt)
+            }
+            val offset: Int = hash[hash.size - 1].toInt() and 0xF
             return hash.copyOfRange(offset, offset + 3)
         }
+
+        @JvmStatic
+        fun otpsGenerater(key: String, vararg salts: ByteArray): MutableCollection<ByteArray> =
+            mutableSetOf<ByteArray>().apply {
+                if (salts.isNotEmpty()) {
+                    for (salt in salts) {
+                        add(otpGenerater(key, salt).also {
+                            Log.d("Dec", String(it))
+                        })
+                    }
+                }
+            }
 
         @JvmStatic
         fun hmacMD5(content: ByteArray, key: String): ByteArray {
@@ -48,7 +60,7 @@ class CryptoConvertUtils {
 
         @JvmStatic
         fun uuidToBytes(uuid: UUID): ByteArray {
-            return ByteBuffer.wrap(ByteArray(16))
+            return ByteBuffer.wrap(ByteArray(Long.SIZE_BYTES * 2))
                 .putLong(uuid.mostSignificantBits)
                 .putLong(uuid.leastSignificantBits)
                 .array()
